@@ -41,7 +41,12 @@ namespace MUD {
         void Move(std::string s);
 
         void Harvest();
+
         inline static Timer *GetTimer() { return &timer; }
+
+        void Deposit(int ityoe, int num);
+
+        void Withdraw(int itype,int num);
     };
 
 } // MUD

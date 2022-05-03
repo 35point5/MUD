@@ -10,8 +10,10 @@ void MUD::Player::Enter(Room *r) {
     std::cout<<"你进入了"<<currentRoom->ID()<<"号房间。"<<std::endl;
 }
 
-void MUD::Player::GetItem(int itemType, int number) {
+int MUD::Player::GetItem(int itemType, int number) {
+    if (items[itemType]->Number()+number<0) number=-items[itemType]->Number();
     items[itemType]->Number()+=number;
+    return number;
 }
 
 void MUD::Player::ShowItems() {

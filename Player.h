@@ -20,7 +20,7 @@ namespace MUD{
     public:
         Player();
         void Enter(Room *r);
-        void GetItem(int itemType,int number);
+        int GetItem(int itemType, int number);
         inline Room *CurrentRoom(){return currentRoom;}
         void ShowItems();
     };

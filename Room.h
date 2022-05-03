@@ -33,6 +33,7 @@ namespace MUD{
         inline void ModifySupplier(Supplier *s){supplier=s;}
         inline Room *GetNeighbour(int d){return neighbours[d];};
         inline std::vector<Generator*> &GetGenerator(){return generators;}
+        inline Supplier *GetSupplier(){return supplier;}
     };
 
 }

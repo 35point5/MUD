@@ -28,13 +28,13 @@ namespace MUD {
                 if (j < maxMapSize - 1) map[i][j]->ModifyNeighbour(map[i][j + 1], East);
             }
         }
-        Generator *W= new Generator(Water,3);
+        Generator *W = new Generator(Water, 3);
         origin->AddGenerator(W);
-        Generator *S= new Generator(Food,1);
+        Generator *S = new Generator(Food, 1);
         origin->AddGenerator(S);
-        Generator *M= new Generator(Metal);
+        Generator *M = new Generator(Metal);
         origin->AddGenerator(M);
-        Supplier *Sup=new Supplier;
+        Supplier *Sup = new Supplier;
         origin->ModifySupplier(Sup);
     }
 
@@ -57,12 +57,14 @@ namespace MUD {
                 Move(sv[1]);
             } else if (sv[0] == "harvest") {
                 Harvest();
-            }
-            else if (sv[0]=="refresh"){
+            } else if (sv[0] == "refresh") {
                 player->CurrentRoom()->ShowInfo();
-            }
-            else if (sv[0]=="bag"){
+            } else if (sv[0] == "bag") {
                 player->ShowItems();
+            } else if (sv[0] == "deposit") {
+                Deposit(std::stoi(sv[1]), std::stoi(sv[2]));
+            } else if (sv[0]=="withdraw"){
+                Withdraw(std::stoi(sv[1]), std::stoi(sv[2]));
             }
 
         }
@@ -97,8 +99,22 @@ namespace MUD {
         for (auto o: cur->GetGenerator()) {
             htype = o->Type();
             hnum = o->Harvest();
-            std::cout<<hnum<<'*'<<o->ShowItemInfo()<<std::endl;
+            std::cout << hnum << '*' << o->ShowItemInfo() << std::endl;
             player->GetItem(htype, hnum);
         }
     }
+
+    void Game::Deposit(int itype, int num) {
+        num = -player->GetItem(itype, -num);
+        player->CurrentRoom()->GetSupplier()->Deposit(itype, num);
+        std::cout << "你向仓库存入了" << num << "*" << Item::ItemInfo[itype] << std::endl;
+    }
+
+    void Game::Withdraw(int itype, int num) {
+        num=player->CurrentRoom()->GetSupplier()->Withdraw(itype,num);
+        player->GetItem(itype,num);
+        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[itype] << std::endl;
+    }
+
+
 } // MUD
