@@ -31,8 +31,13 @@ void MUD::Player::ShowItems() {
     }
 }
 
-MUD::Player::Player() {
+MUD::Player::Player(Connection<Telnet> &c) {
+    conn=&c;
     for (int i = 0; i < MaxItemCnt; ++i) {
         items[i]=new Item(i);
     }
+}
+
+void MUD::Player::Sendln(std::string s) {
+    conn->SendString(s+newline);
 }

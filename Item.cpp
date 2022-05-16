@@ -5,7 +5,7 @@
 #include "Item.h"
 
 namespace MUD {
-    std::string Item::ItemInfo[MaxItemCnt]={"水","食物","铁锭"};
+    std::string Item::ItemInfo[MaxItemCnt]={"water","food","metal","wood","gunpowder","key of farm","key of BlastFurnance","caller to the sun","the Reconstructor","sword","gun","bullet"};
 
     Item::Item(int t):itemType(t),number(0){}
 } // MUD

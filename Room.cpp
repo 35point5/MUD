@@ -28,15 +28,22 @@ void MUD::Room::AddGenerator(MUD::Generator *g) {
     generators.push_back(g);
 }
 
-void MUD::Room::ShowInfo() {
+std::string MUD::Room::ShowInfo() {
     if (players.empty() && generators.empty() && supplier == nullptr) {
-        std::cout << "这里啥都没有。" << std::endl;
-        return;
+//        std::cout << "这里啥都没有。" << std::endl;
+        return cyan+"There is nothing.";
     }
-    std::cout << "这里有：" << std::endl;
-    if (supplier != nullptr) std::cout << "仓库" << std::endl;
+    std::stringstream ss;
+//    std::cout << "这里有：" << std::endl;
+    ss<<green<<"There exists:"<< "\r\n";
+    if (supplier != nullptr){
+//        std::cout << "仓库" << std::endl;
+        ss<<green<<"A supplier."<< "\r\n";
+    }
     for (auto o: generators) {
-        std::cout << o->ShowGeneratorInfo() << "，内含" << o->Remain() << "单位" << o->ShowItemInfo() << "。" << std::endl;
+//        std::cout << o->ShowGeneratorInfo() << "，内含" << o->Remain() << "单位" << o->ShowItemInfo() << "。" << std::endl;
+        ss<<green<<"A "<<o->ShowGeneratorInfo()<<", contains "<<o->Remain()<<'*'<<o->ShowItemInfo()<<'.'<< "\r\n";
     }
+    return ss.str();
 }
 

@@ -10,19 +10,23 @@
 #include <iostream>
 #include "Entity.h"
 #include "Item.h"
-
+#include "Telnet.h"
+#include "string"
 namespace MUD{
     class Room;
     class Player : public Entity {
     private:
         Room *currentRoom;
         Item *items[MaxItemCnt];
+        Connection<Telnet> *conn;
     public:
-        Player();
+        Player(Connection<Telnet> &);
         void Enter(Room *r);
         int GetItem(int itemType, int number);
         inline Room *CurrentRoom(){return currentRoom;}
         void ShowItems();
+        void Sendln(std::string s);
+        inline int ItemCnt(int id){return items[id]->Number();}
     };
 
 }

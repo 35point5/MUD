@@ -5,11 +5,15 @@
 #include "Timer.h"
 
 namespace MUD {
-    int MUD::Timer::TimeTicks() {
-        return clock();
+    long long int MUD::Timer::TimeMS() {
+        timeval t;
+        gettimeofday(&t,nullptr);
+        return t.tv_sec*1000ll+t.tv_usec/1000;
     }
 
-    int Timer::TimeS() {
-        return clock()/CLOCKS_PER_SEC;
+    long long int Timer::TimeS() {
+        timeval t;
+        gettimeofday(&t,nullptr);
+        return t.tv_sec;
     }
 } // MUD

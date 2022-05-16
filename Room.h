@@ -4,7 +4,7 @@
 #include "vector"
 #include "Entity.h"
 #include "Supplier.h"
-
+#include "sstream"
 
 #ifndef PROJECT_ROOM_H
 #define PROJECT_ROOM_H
@@ -29,7 +29,7 @@ namespace MUD{
         void AddPlayer(Player *p);
         void RemovePlayer(int pid);
         void AddGenerator(Generator *g);
-        void ShowInfo();
+        std::string ShowInfo();
         inline void ModifySupplier(Supplier *s){supplier=s;}
         inline Room *GetNeighbour(int d){return neighbours[d];};
         inline std::vector<Generator*> &GetGenerator(){return generators;}

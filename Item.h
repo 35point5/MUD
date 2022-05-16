@@ -8,10 +8,26 @@
 #include <string>
 
 namespace MUD {
-    const int Water = 0;
-    const int Food = 1;
-    const int Metal = 2;
-    const int MaxItemCnt = 10;
+//    const int Water = 0;
+//    const int Food = 1;
+//    const int Metal = 2;
+//    const int Wood = 3;
+//    const int Gunpowder=4;
+    enum ItemList{
+        Water=0,
+        Food,
+        Metal,
+        Wood,
+        Gunpowder,
+        KeyOfFarm,
+        KeyOfBlastFurnance,
+        CallerToTheSun,
+        TheReconstructor,
+        Sword,
+        Gun,
+        Bullet
+    };
+    const int MaxItemCnt = 20;
 
     class Item {
     private:
@@ -19,6 +35,7 @@ namespace MUD {
         int number;
     public:
         Item(int t);
+
         static std::string ItemInfo[MaxItemCnt];
 
         inline int &ItemType() { return itemType; }

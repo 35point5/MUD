@@ -14,7 +14,7 @@ namespace MUD {
         int frequency;
         int itemType;
         int remain;
-        int lastTime;
+        long long lastTime;
         bool disabled;
     public:
         static std::string GeneratorInfo[MaxItemCnt];
