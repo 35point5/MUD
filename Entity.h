@@ -20,7 +20,9 @@ public:
 
     inline std::string Name() { return name; }
 
-    inline int ID() const { return id; }
+    inline int GetID() const { return id; }
+
+    inline void Rename(std::string s){name=s;}
 };
 
 }

@@ -17,7 +17,7 @@ void MUD::Room::AddPlayer(Player *p) {
 void MUD::Room::RemovePlayer(int pid) {
     std::vector<Player *>::iterator it;
     for (it = players.begin(); it != players.end(); ++it) {
-        if ((*it)->ID() == pid) {
+        if ((*it)->GetID() == pid) {
             players.erase(it);
             break;
         }

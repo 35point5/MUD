@@ -2,43 +2,17 @@
 // Created by Mogician on 2022/5/1.
 //
 
-#include <fstream>
+
 #include "Game.h"
 
 namespace MUD {
     Timer Game::timer;
+    Room Game::map[maxMapSize][maxMapSize];
+    int Game::n;
+    int Game::m;
+    Room *Game::origin;
 
-    void Game::GenerateMap() {
-        std::ifstream is;
-        is.open("map.data", std::ios::in);
-        std::string s;
-        for (n = 0; n < maxMapSize; ++n) {
-            if (!(is >> s)) break;
-            for (m = 0; m < s.length(); ++m) {
-                map[n][m] = new Room;
-                if (s[m] == 'O') origin = map[n][m];
-            }
-        }
-        std::cout << "size:" << n << ' ' << m << std::endl;
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                if (i) map[i][j]->ModifyNeighbour(map[i - 1][j], North);
-                if (j) map[i][j]->ModifyNeighbour(map[i][j - 1], West);
-                if (i < maxMapSize - 1) map[i][j]->ModifyNeighbour(map[i + 1][j], South);
-                if (j < maxMapSize - 1) map[i][j]->ModifyNeighbour(map[i][j + 1], East);
-            }
-        }
-        Generator *W = new Generator(Water, 3);
-        origin->AddGenerator(W);
-        Generator *S = new Generator(Food, 1);
-        origin->AddGenerator(S);
-        Generator *M = new Generator(Metal);
-        origin->AddGenerator(M);
-        Supplier *Sup = new Supplier;
-        origin->ModifySupplier(Sup);
-    }
-
-    void Game::Born(Connection <Telnet> &conn) {
+    void Game::Born(Connection<Telnet> &conn) {
         player = new Player(conn);
         player->Enter(origin);
         player->Sendln(origin->ShowInfo());
@@ -46,25 +20,33 @@ namespace MUD {
     }
 
     void Game::Handle(std::string op) {
+        if (!op.length()) return;
         StringVec sv;
         std::transform(op.begin(), op.end(), op.begin(), ::tolower);
         sv = split(op);
         //for (auto o: sv) std::cout << o << std::endl;
-        if (sv[0] == "move") {
-            Move(sv[1]);
-        } else if (sv[0] == "harvest") {
-            Harvest();
-        } else if (sv[0] == "refresh") {
-            player->Sendln(player->CurrentRoom()->ShowInfo());
-        } else if (sv[0] == "bag") {
-            player->ShowItems();
-        } else if (sv[0] == "deposit") {
-            Deposit(std::stoi(sv[1]), std::stoi(sv[2]));
-        } else if (sv[0] == "withdraw") {
-            Withdraw(std::stoi(sv[1]), std::stoi(sv[2]));
-        }else if (sv[0]=="recipe"){
-            ShowRecipe();
-        }
+        try {
+            if (sv[0] == "move") {
+                Move(sv[1]);
+            } else if (sv[0] == "harvest") {
+                Harvest();
+            } else if (sv[0] == "refresh") {
+                player->Sendln(player->CurrentRoom()->ShowInfo());
+            } else if (sv[0] == "bag") {
+                player->Sendln(player->ShowItems());
+            } else if (sv[0] == "deposit") {
+                Deposit(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+            } else if (sv[0] == "withdraw") {
+                Withdraw(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+            } else if (sv[0] == "recipe") {
+                ShowRecipe();
+            } else if (sv[0] == "craft") {
+                Craft(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+            } else if (sv[0] == "momomo") {
+                Momomo();
+            }
+
+        } catch (...) { player->InvalidCommand(); }
 
     }
 
@@ -76,17 +58,17 @@ namespace MUD {
         else if (s == "n") dir = 3;
         else {
 //            std::cout<<"无效指令"<<std::endl;
-            player->Sendln(red+"Invalid command!");
+            player->InvalidCommand();
             return;
         }
         Room *cur = player->CurrentRoom();
         Room *nxt = cur->GetNeighbour(dir);
         if (nxt == nullptr) {
 //            std::cout << "There is no way out!" << std::endl;
-            player->Sendln(red+"There is no way out!");
+            player->Sendln(red + "There is no way out!");
             return;
         }
-        cur->RemovePlayer(player->ID());
+        cur->RemovePlayer(player->GetID());
         player->Enter(nxt);
         player->Sendln(nxt->ShowInfo());
         nxt->AddPlayer(player);
@@ -96,13 +78,13 @@ namespace MUD {
         Room *cur = player->CurrentRoom();
 //        std::cout << "You get:" << std::endl;
         std::stringstream ss;
-        ss<<green+"You've got:"<<"\r\n";
+        ss << green + "You've got:" << "\r\n";
         int hnum, htype;
         for (auto o: cur->GetGenerator()) {
             htype = o->Type();
             hnum = o->Harvest();
 //            std::cout << hnum << '*' << o->ShowItemInfo() << std::endl;
-            ss<<green+std::to_string(hnum)+'*'+o->ShowItemInfo()<<"\r\n";
+            ss << green + std::to_string(hnum) + '*' + o->ShowItemInfo() << "\r\n";
             player->GetItem(htype, hnum);
         }
         player->Sendln(ss.str());
@@ -112,14 +94,14 @@ namespace MUD {
         num = -player->GetItem(itype, -num);
         player->CurrentRoom()->GetSupplier()->Deposit(itype, num);
 //        std::cout << "You deposit: " << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green+"You've deposited: "+ std::to_string(num)+'*'+Item::ItemInfo[itype]);
+        player->Sendln(green + "You've deposited: " + std::to_string(num) + '*' + Item::ItemInfo[itype]);
     }
 
     void Game::Withdraw(int itype, int num) {
         num = player->CurrentRoom()->GetSupplier()->Withdraw(itype, num);
         player->GetItem(itype, num);
 //        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green+"You've withdrawn: "+ std::to_string(num)+'*'+Item::ItemInfo[itype]);
+        player->Sendln(green + "You've withdrawn: " + std::to_string(num) + '*' + Item::ItemInfo[itype]);
     }
 
     void Game::Enter() {
@@ -132,30 +114,89 @@ namespace MUD {
 
     void Game::ShowRecipe() {
         std::stringstream ss;
-        int cnt=0;
-        for (int i=0;i<RecipeCnt;++i){
-            bool flag=true;
-            for (int j=0;j<MaxItemCnt;++j){
-                if (Recipe[i][j] && !player->ItemCnt(j)){
-                    flag=false;
+        int cnt = 0;
+        for (int i = 0; i < RecipeCnt; ++i) {
+            bool flag = true;
+            for (int j = 0; j < MaxItemCnt; ++j) {
+                if (Recipe[i][j] && !player->ItemCnt(j)) {
+                    flag = false;
                     break;
                 }
             }
-            if (flag){
-                if (!cnt++) ss<<green<<"Recipes:"<<"\r\n";
-                ss<<green;
-                for (int j=0;j<MaxItemCnt;++j){
-                    if (Recipe[i][j]) ss<<Recipe[i][j]<<"*"<<Item::ItemInfo[j]<<" ";
+            if (flag) {
+                if (!cnt++) ss << green << "Recipes:" << "\r\n";
+                ss << green;
+                for (int j = 0; j < MaxItemCnt; ++j) {
+                    if (Recipe[i][j]) ss << Recipe[i][j] << "*" << Item::ItemInfo[j] << " ";
                 }
-                ss<<"-->";
-                for (int j=0;j<MaxItemCnt;++j){
-                    if (Product[i][j]) ss<<Product[i][j]<<"*"<<Item::ItemInfo[j]<<" ";
+                ss << "-->";
+                for (int j = 0; j < MaxItemCnt; ++j) {
+                    if (Product[i][j]) ss << Product[i][j] << "*" << Item::ItemInfo[j] << " ";
                 }
-                ss<<"\r\n";
+                ss << "\r\n";
             }
         }
-        if (!cnt) ss<<cyan<<"No available recipe now!";
+        if (!cnt) ss << cyan << "No available recipe now!";
         player->Sendln(ss.str());
+    }
+
+    void Game::Momomo() {
+        for (int i = 0; i < MaxItemCnt; ++i) player->GetItem(i, 999);
+    }
+
+    void Game::Craft(int id, int num) {
+        bool flag = true;
+        for (int i = 0; i < MaxItemCnt; ++i) {
+            if (Recipe[id][i] * num > player->ItemCnt(i)) {
+                flag = false;
+                break;
+            }
+        }
+        std::stringstream ss;
+        if (flag) {
+            ss << green << "You consumed ";
+            for (int i = 0; i < MaxItemCnt; ++i)
+                if (Recipe[id][i]) {
+                    player->GetItem(i, -num * Recipe[id][i]);
+                    ss << num * Recipe[id][i] << "*" << Item::ItemInfo[i] << " ";
+                }
+            ss << "\r\n" << green << "And got ";
+            for (int i = 0; i < MaxItemCnt; ++i)
+                if (Product[id][i]) {
+                    player->GetItem(i, num * Product[id][i]);
+                    ss << num * Product[id][i] << "*" << Item::ItemInfo[i] << " ";
+                }
+        } else ss << red << "Insufficient materials.";
+        player->Sendln(ss.str());
+    }
+
+    void Game::GenerateMap(){
+        std::ifstream is;
+        is.open("map.data", std::ios::in);
+        std::string s;
+        for (n = 0; n < maxMapSize; ++n) {
+            if (!(is >> s)) break;
+            for (m = 0; m < s.length(); ++m) {
+                if (s[m] == 'O') origin = &map[n][m];
+            }
+        }
+        std::cout << "size:" << n << ' ' << m << std::endl;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                if (i) map[i][j].ModifyNeighbour(&map[i - 1][j], North);
+                if (j) map[i][j].ModifyNeighbour(&map[i][j - 1], West);
+                if (i < maxMapSize - 1) map[i][j].ModifyNeighbour(&map[i + 1][j], South);
+                if (j < maxMapSize - 1) map[i][j].ModifyNeighbour(&map[i][j + 1], East);
+            }
+        }
+        Generator *W = new Generator(Water, 3);
+        origin->AddGenerator(W);
+        Generator *S = new Generator(Food, 1);
+        origin->AddGenerator(S);
+        Generator *M = new Generator(Metal);
+        origin->AddGenerator(M);
+        Supplier *Sup = new Supplier;
+        origin->ModifySupplier(Sup);
     }
 
 } // MUD

@@ -14,32 +14,32 @@
 #include "Generator.h"
 #include "StringLib.h"
 #include "Telnet.h"
+#include "fstream"
 
 namespace MUD {
     class Generator;
 
     const int maxMapSize = 20;
 
-class Game: public Telnet::handler {
+    class Game : public Telnet::handler {
     private:
         static Timer timer;
-        Room *map[maxMapSize][maxMapSize];
-        int n, m;
-        Room *origin;
+        static Room map[maxMapSize][maxMapSize];
+        static int n, m;
+        static Room *origin;
         Player *player;
     public:
-        Game(Connection<Telnet>& conn): Telnet::handler(conn) {
-            GenerateMap();
+        Game(Connection<Telnet> &conn) : Telnet::handler(conn) {
             Born(conn);
         }
 
-        void GenerateMap();
+        static void GenerateMap();
 
         void Enter();
 
         void Leave();
 
-        void Born(Connection <Telnet> &);
+        void Born(Connection<Telnet> &);
 
         void Handle(std::string op);
 
@@ -54,6 +54,10 @@ class Game: public Telnet::handler {
         void Withdraw(int itype, int num);
 
         void ShowRecipe();
+
+        void Craft(int id, int num);
+
+        void Momomo();
     };
 
 } // MUD

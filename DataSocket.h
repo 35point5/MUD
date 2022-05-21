@@ -7,6 +7,8 @@
 
 #include "Socket.h"
 #include "string"
+#include "glog/logging.h"
+#include "glog/raw_logging.h"
 namespace MUD {
 
     class DataSocket: public Socket{
@@ -19,6 +21,7 @@ namespace MUD {
         int Send(const char *buf, int len);
         int Receive(char *buf,int len);
         void Close() override;
+        inline std::string IP(){return inet_ntoa(remoteInfo.sin_addr);}
     };
 
 } // MUD

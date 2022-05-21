@@ -24,9 +24,10 @@ namespace MUD{
         void Enter(Room *r);
         int GetItem(int itemType, int number);
         inline Room *CurrentRoom(){return currentRoom;}
-        void ShowItems();
+        std::string ShowItems();
         void Sendln(std::string s);
         inline int ItemCnt(int id){return items[id]->Number();}
+        inline void InvalidCommand(){ Sendln(red+"Invalid command!");}
     };
 
 }

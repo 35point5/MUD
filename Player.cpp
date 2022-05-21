@@ -7,7 +7,9 @@
 #include "Room.h"
 void MUD::Player::Enter(Room *r) {
     currentRoom=r;
-    std::cout<<"你进入了"<<currentRoom->ID()<<"号房间。"<<std::endl;
+    std::stringstream ss;
+    ss << green << "You entered room No." << currentRoom->GetID() << "\r\n";
+    Sendln(ss.str());
 }
 
 int MUD::Player::GetItem(int itemType, int number) {
@@ -16,23 +18,25 @@ int MUD::Player::GetItem(int itemType, int number) {
     return number;
 }
 
-void MUD::Player::ShowItems() {
+std::string MUD::Player::ShowItems() {
     bool flag= false;
+    std::stringstream ss;
     for (auto o:items) {
         if (o->Number()) flag= true;
     }
     if (!flag){
-        std::cout<<"你啥都没有"<<std::endl;
-        return;
+        return cyan+"You have nothing.";
     }
-    std::cout<<"你有："<<std::endl;
+    ss<<green<<"You have:"<<"\r\n";
     for (auto o:items) {
-        if (o->Number()) std::cout<<o->Number()<<"*"<<o->Info()<<"，物品ID："<<o->ItemType()<<std::endl;
+        if (o->Number()) ss<<green<<o->Number()<<"*"<<o->Info()<<", item GetID:"<<o->ItemType()<<"\r\n";
     }
+    return ss.str();
 }
 
 MUD::Player::Player(Connection<Telnet> &c) {
     conn=&c;
+    name=c.IP();
     for (int i = 0; i < MaxItemCnt; ++i) {
         items[i]=new Item(i);
     }

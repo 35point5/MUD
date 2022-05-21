@@ -7,6 +7,7 @@
 #include "list"
 #include "Connection.h"
 #include "SocketSet.h"
+#include "glog/logging.h"
 namespace MUD {
     template<class protocol,class defaultHandler>
     class ConnectionManager {
@@ -37,16 +38,20 @@ namespace MUD {
         void Listen(){
             if (!cList.empty() && sSet.Poll()){
                 for (cListIt it=cList.begin();it!=cList.end();){
+
                     if (sSet.IsAct(**it)){
                         try{
                             (*it)->ReceiveData();
+//                            LOG(INFO)<<(*it)->IP()<<" received."<<std::endl;
                             ++it;
                         }
                         catch (...){
+//                            LOG(INFO)<<(*it)->IP()<<" caught."<<std::endl;
                             (*it)->Close();
                             Close(it);
                         }
                     }
+                    else ++it;
                 }
             }
         }
@@ -62,8 +67,11 @@ namespace MUD {
         }
         inline void Manage(){
             Listen();
+//            LOG(INFO)<<"Mlisten++"<<std::endl;
             Send();
+//            LOG(INFO)<<"Msend++"<<std::endl;
             CloseConn();
+//            LOG(INFO)<<"Mclose++"<<std::endl;
         }
     };
 

@@ -56,6 +56,7 @@ namespace MUD {
     }
 
     void DataSocket::Close() {
+        LOG(INFO)<<inet_ntoa(remoteInfo.sin_addr)<<" closed"<<std::endl;
         shutdown(sock, SHUT_RDWR);
         Socket::Close();
         connected = false;

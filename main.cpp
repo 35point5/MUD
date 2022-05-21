@@ -4,6 +4,7 @@
 #include "ConnectionManager.h"
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
+#include <unistd.h>
 using namespace MUD;
 int main(int argc, char** argv) {
     FLAGS_logtostderr=1;
@@ -13,10 +14,13 @@ int main(int argc, char** argv) {
     ConnectionManager<Telnet,Game> cm;
     lm.SwitchConnManager(&cm);
     lm.AddPort(23);
+    Game::GenerateMap();
     while (true){
         lm.Listen();
+//        LOG(INFO)<<"listen++"<<std::endl;
         cm.Manage();
-
+//        sleep(1);
+//        LOG(INFO)<<"round++"<<std::endl;
     }
     return 0;
 }

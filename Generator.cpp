@@ -18,7 +18,7 @@ namespace MUD {
     void Generator::Update() {
         Timer *timer=Game::GetTimer();
         long long duration=timer->TimeS()-lastTime;
-        LOG(INFO)<<duration<<std::endl;
+//        LOG(INFO)<<duration<<std::endl;
         remain+=duration/frequency;
         lastTime+=duration/frequency*frequency;
         if (remain>capacity) remain=capacity;
