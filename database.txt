@@ -1,5 +1,0 @@
-mud
-sh-cynosdbmysql-grp-qv4mju9i.sql.tencentcdb.com
-root
-AtE@ym7&YF=6jAUjyq
-26325
