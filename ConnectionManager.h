@@ -33,6 +33,7 @@ namespace MUD {
         void Close(cListIt &it){
             sSet.RemoveSocket(**it);
             (*it)->CloseSocket();
+            delete *it;
             it=cList.erase(it);
         }
         void Listen(){
@@ -46,7 +47,7 @@ namespace MUD {
                             ++it;
                         }
                         catch (...){
-//                            LOG(INFO)<<(*it)->IP()<<" caught."<<std::endl;
+                            LOG(INFO)<<(*it)->IP()<<" caught."<<std::endl;
                             (*it)->Close();
                             Close(it);
                         }

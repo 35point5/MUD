@@ -25,25 +25,35 @@ namespace MUD {
         std::transform(op.begin(), op.end(), op.begin(), ::tolower);
         sv = split(op);
         //for (auto o: sv) std::cout << o << std::endl;
+
         try {
-            if (sv[0] == "move") {
-                Move(sv[1]);
-            } else if (sv[0] == "harvest") {
-                Harvest();
-            } else if (sv[0] == "refresh") {
-                player->Sendln(player->CurrentRoom()->ShowInfo());
-            } else if (sv[0] == "bag") {
-                player->Sendln(player->ShowItems());
-            } else if (sv[0] == "deposit") {
-                Deposit(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
-            } else if (sv[0] == "withdraw") {
-                Withdraw(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
-            } else if (sv[0] == "recipe") {
-                ShowRecipe();
-            } else if (sv[0] == "craft") {
-                Craft(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
-            } else if (sv[0] == "momomo") {
-                Momomo();
+            if (player->GetRole()==guest){
+                if (sv[0]=="register"){
+                    player->Register(sv.at(1),sv.at(2));
+                }else if (sv[0]=="login"){
+                    player->Login(sv.at(1),sv.at(2));
+                }
+            }else
+            {
+                if (sv[0] == "move") {
+                    Move(sv.at(1));
+                } else if (sv[0] == "harvest") {
+                    Harvest();
+                } else if (sv[0] == "refresh") {
+                    player->Sendln(player->CurrentRoom()->ShowInfo());
+                } else if (sv[0] == "bag") {
+                    player->Sendln(player->ShowItems());
+                } else if (sv[0] == "deposit") {
+                    Deposit(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                } else if (sv[0] == "withdraw") {
+                    Withdraw(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                } else if (sv[0] == "recipe") {
+                    ShowRecipe();
+                } else if (sv[0] == "craft") {
+                    Craft(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                } else if (sv[0] == "momomo") {
+                    Momomo();
+                }
             }
 
         } catch (...) { player->InvalidCommand(); }
@@ -133,7 +143,7 @@ namespace MUD {
                 for (int j = 0; j < MaxItemCnt; ++j) {
                     if (Product[i][j]) ss << Product[i][j] << "*" << Item::ItemInfo[j] << " ";
                 }
-                ss << "\r\n";
+                ss <<"(ID:"<< i << ")\r\n";
             }
         }
         if (!cnt) ss << cyan << "No available recipe now!";
@@ -197,6 +207,10 @@ namespace MUD {
         origin->AddGenerator(M);
         Supplier *Sup = new Supplier;
         origin->ModifySupplier(Sup);
+    }
+
+    Game::~Game() {
+        delete player;
     }
 
 } // MUD

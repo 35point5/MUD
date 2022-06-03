@@ -32,7 +32,7 @@ namespace MUD {
         Game(Connection<Telnet> &conn) : Telnet::handler(conn) {
             Born(conn);
         }
-
+        ~Game();
         static void GenerateMap();
 
         void Enter();

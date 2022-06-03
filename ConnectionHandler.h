@@ -13,7 +13,7 @@ namespace MUD {
         Connection<protocol> *connection;
     public:
         ConnectionHandler(Connection<protocol>& conn):connection(&conn){};
-        virtual ~ConnectionHandler(){delete connection;};
+        virtual ~ConnectionHandler(){};
         virtual void Handle(commandType command)=0;
         virtual void Enter()=0;
         virtual void Leave()=0;

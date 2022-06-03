@@ -80,6 +80,7 @@ namespace MUD {
 
     template<class protocol>
     Connection<protocol>::~Connection() {
+        LOG(INFO)<<"Connection<protocol>::~Connection"<<std::endl;
         delete hand;
     }
 } // MUD
