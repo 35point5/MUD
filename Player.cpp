@@ -6,11 +6,18 @@
 #include "Player.h"
 #include "Room.h"
 #include "Database.h"
+
+int MUD::Player::DefaultHP=100;
+int MUD::Player::DefaultAP=20;
+int MUD::Player::DefaultHeal=1000;
+
 void MUD::Player::Enter(Room *r) {
     currentRoom=r;
-    std::stringstream ss;
-    ss << green << "You entered room No." << currentRoom->GetID() << "\r\n";
-    Sendln(ss.str());
+    if (role>guest){
+        std::stringstream ss;
+        ss << green << "You entered room No." << currentRoom->GetID() << "\r\n";
+        Sendln(ss.str());
+    }
 }
 
 int MUD::Player::GetItem(int itemType, int number=0) {
@@ -35,13 +42,13 @@ std::string MUD::Player::ShowItems() {
     return ss.str();
 }
 
-MUD::Player::Player(Connection<Telnet> &c): role(guest){
+MUD::Player::Player(Connection<Telnet> &c): Creature(DefaultHeal,DefaultHP,DefaultAP), role(guest){
     conn=&c;
     name=c.IP();
     for(int i=0;i<MaxItemCnt;++i) items[i]=Item(i);
 }
 
-void MUD::Player::Sendln(std::string s) {
+void MUD::Player::Sendln(const std::string &s) {
     conn->SendString(s+newline);
 }
 
@@ -97,6 +104,7 @@ bool MUD::Player::Register(const std::string &p_name, const std::string &p_passw
     name=p_name;
     password=p_password;
     Save(SerializeTo());
+    Sendln(currentRoom->ShowInfo());
     return true;
 }
 
@@ -119,6 +127,7 @@ bool MUD::Player::Login(const std::string &p_name, const std::string &p_password
     auto res= FindPlayer(p_name);
     auto row=*res.begin();
     UnserializeFrom(row["info"].c_str());
+    Sendln(currentRoom->ShowInfo());
     return true;
 }
 
@@ -126,4 +135,15 @@ void MUD::Player::UnserializeFrom(const std::string &s) {
     std::stringstream ss(s);
     boost::archive::text_iarchive ia(ss);
     ia>>*this;
+}
+
+bool MUD::Player::Attack(MUD::Creature &enemy) {
+    bool killed=enemy.GetHurt(ap);
+    Sendln(cyan+"You attack "+enemy.Name()+", cause "+std::to_string(ap)+" damage.");
+    enemy.Sendln(red+name+" attack you, causing "+std::to_string(ap)+" damage.");
+    if (killed){
+        Sendln(green+"You defeat "+enemy.Name()+"!");
+        enemy.Sendln(red+"You are defeated by "+name+"!");
+    }
+    return killed;
 }

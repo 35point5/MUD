@@ -32,6 +32,7 @@ namespace MUD {
         FindPlayer=Conn.query("select * from players where name=%0q;");
         FindPlayer.parse();
         AuthPlayer=Conn.query("select * from players where name=%0q and password=%1q;");
+//        AuthPlayer=Conn.query("select * from players;");
         AuthPlayer.parse();
         UpdatePlayer=Conn.query("update players set name=%0q,password=%1q,info=%2q where name=%3q;");
         UpdatePlayer.parse();

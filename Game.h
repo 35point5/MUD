@@ -57,6 +57,8 @@ namespace MUD {
 
         void Craft(int id, int num);
 
+        void Status();
+
         void Momomo();
     };
 

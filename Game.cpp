@@ -15,7 +15,7 @@ namespace MUD {
     void Game::Born(Connection<Telnet> &conn) {
         player = new Player(conn);
         player->Enter(origin);
-        player->Sendln(origin->ShowInfo());
+        player->Sendln(green + "Welcome! Please register or login first.");
         origin->AddPlayer(player);
     }
 
@@ -27,14 +27,13 @@ namespace MUD {
         //for (auto o: sv) std::cout << o << std::endl;
 
         try {
-            if (player->GetRole()==guest){
-                if (sv[0]=="register"){
-                    player->Register(sv.at(1),sv.at(2));
-                }else if (sv[0]=="login"){
-                    player->Login(sv.at(1),sv.at(2));
+            if (player->GetRole() == guest) {
+                if (sv[0] == "register") {
+                    player->Register(sv.at(1), sv.at(2));
+                } else if (sv[0] == "login") {
+                    player->Login(sv.at(1), sv.at(2));
                 }
-            }else
-            {
+            } else {
                 if (sv[0] == "move") {
                     Move(sv.at(1));
                 } else if (sv[0] == "harvest") {
@@ -43,6 +42,8 @@ namespace MUD {
                     player->Sendln(player->CurrentRoom()->ShowInfo());
                 } else if (sv[0] == "bag") {
                     player->Sendln(player->ShowItems());
+                } else if (sv[0] == "status") {
+                    Status();
                 } else if (sv[0] == "deposit") {
                     Deposit(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
                 } else if (sv[0] == "withdraw") {
@@ -143,7 +144,7 @@ namespace MUD {
                 for (int j = 0; j < MaxItemCnt; ++j) {
                     if (Product[i][j]) ss << Product[i][j] << "*" << Item::ItemInfo[j] << " ";
                 }
-                ss <<"(ID:"<< i << ")\r\n";
+                ss << "(ID:" << i << ")\r\n";
             }
         }
         if (!cnt) ss << cyan << "No available recipe now!";
@@ -180,7 +181,7 @@ namespace MUD {
         player->Sendln(ss.str());
     }
 
-    void Game::GenerateMap(){
+    void Game::GenerateMap() {
         std::ifstream is;
         is.open("map.data", std::ios::in);
         std::string s;
@@ -211,6 +212,11 @@ namespace MUD {
 
     Game::~Game() {
         delete player;
+    }
+
+    void Game::Status() {
+        player->Sendln(cyan + "HP: " + std::to_string(player->GetHP()) + "    AP: " + std::to_string(player->GetAP()));
+        player->Sendln(player->ShowItems());
     }
 
 } // MUD
