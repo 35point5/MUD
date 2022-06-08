@@ -5,20 +5,19 @@
 #include "Supplier.h"
 
 namespace MUD {
-    int Supplier::Deposit(int itype, int num) {
-        Storage[itype]->Number()+=num;
-        return num;
+    void Supplier::Deposit(Item *item) {
+        storage.push_back(item);
     }
 
-    int Supplier::Withdraw(int itype, int num) {
-        num=std::min(num,Storage[itype]->Number());
-        Storage[itype]->Number()-=num;
-        return num;
+    Item *Supplier::Withdraw(int itype) {
+        for (auto it = storage.begin(); it != storage.end(); ++it)
+            if ((*it)->ItemType() == itype) {
+                auto res = *it;
+                storage.erase(it);
+                return res;
+            }
+        return nullptr;
     }
 
-    Supplier::Supplier(){
-        for (int i = 0; i < MaxItemCnt; ++i) {
-            Storage[i]=new Item(i);
-        }
-    }
+    Supplier::Supplier()=default;
 } // MUD

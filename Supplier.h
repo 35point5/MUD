@@ -13,11 +13,11 @@ namespace MUD {
     const int Product[RecipeCnt][MaxItemCnt]={{0,0,0,0,0,0,0,0,0,1},{0,0,0,0,0,0,0,0,0,0,1},{0,0,0,0,0,0,0,0,0,0,0,1}};
     class Supplier {
     private:
-        Item *Storage[MaxItemCnt];
+        std::vector<Item*> storage;
     public:
         Supplier();
-        int Deposit(int itype, int num);
-        int Withdraw(int itype,int num);
+        void Deposit(Item *item);
+        Item *Withdraw(int itype);
     };
 
 } // MUD

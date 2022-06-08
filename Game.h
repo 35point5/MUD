@@ -26,9 +26,9 @@ namespace MUD {
         static Timer timer;
         static Room map[maxMapSize][maxMapSize];
         static int n, m;
-        static Room *origin;
         Player *player;
     public:
+        static Room *origin;
         Game(Connection<Telnet> &conn) : Telnet::handler(conn) {
             Born(conn);
         }
@@ -49,9 +49,9 @@ namespace MUD {
 
         inline static Timer *GetTimer() { return &timer; }
 
-        void Deposit(int ityoe, int num);
+        void Deposit(int itype);
 
-        void Withdraw(int itype, int num);
+        void Withdraw(int itype);
 
         void ShowRecipe();
 

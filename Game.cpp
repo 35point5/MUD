@@ -45,9 +45,9 @@ namespace MUD {
                 } else if (sv[0] == "status") {
                     Status();
                 } else if (sv[0] == "deposit") {
-                    Deposit(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                    Deposit(std::stoi(sv.at(1)));
                 } else if (sv[0] == "withdraw") {
-                    Withdraw(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                    Withdraw(std::stoi(sv.at(1)));
                 } else if (sv[0] == "recipe") {
                     ShowRecipe();
                 } else if (sv[0] == "craft") {
@@ -96,23 +96,27 @@ namespace MUD {
             hnum = o->Harvest();
 //            std::cout << hnum << '*' << o->ShowItemInfo() << std::endl;
             ss << green + std::to_string(hnum) + '*' + o->ShowItemInfo() << "\r\n";
-            player->GetItem(htype, hnum);
+            player->GetItem(new Item(htype, hnum));
         }
         player->Sendln(ss.str());
     }
 
-    void Game::Deposit(int itype, int num) {
-        num = -player->GetItem(itype, -num);
-        player->CurrentRoom()->GetSupplier()->Deposit(itype, num);
+    void Game::Deposit(int itype) {
+        auto item=player->FetchItem(itype);
+        player->CurrentRoom()->GetSupplier()->Deposit(item);
 //        std::cout << "You deposit: " << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green + "You've deposited: " + std::to_string(num) + '*' + Item::ItemInfo[itype]);
+        player->Sendln(green + "You've deposited: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[itype]);
     }
 
-    void Game::Withdraw(int itype, int num) {
-        num = player->CurrentRoom()->GetSupplier()->Withdraw(itype, num);
-        player->GetItem(itype, num);
+    void Game::Withdraw(int itype) {
+        auto item = player->CurrentRoom()->GetSupplier()->Withdraw(itype);
+        if (item== nullptr){
+            player->Sendln(red+"No such item!");
+            return;
+        }
+        player->GetItem(item);
 //        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green + "You've withdrawn: " + std::to_string(num) + '*' + Item::ItemInfo[itype]);
+        player->Sendln(green + "You've withdrawn: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[itype]);
     }
 
     void Game::Enter() {
@@ -152,7 +156,7 @@ namespace MUD {
     }
 
     void Game::Momomo() {
-        for (int i = 0; i < MaxItemCnt; ++i) player->GetItem(i, 999);
+        for (int i = 0; i < MaxItemCnt; ++i) player->GetItem(new Item(i,999));
     }
 
     void Game::Craft(int id, int num) {
@@ -168,13 +172,14 @@ namespace MUD {
             ss << green << "You consumed ";
             for (int i = 0; i < MaxItemCnt; ++i)
                 if (Recipe[id][i]) {
-                    player->GetItem(i, -num * Recipe[id][i]);
+//                    player->GetItem(i, -num * Recipe[id][i]);
+                    player->RemoveItem(i,num*Recipe[id][i]);
                     ss << num * Recipe[id][i] << "*" << Item::ItemInfo[i] << " ";
                 }
             ss << "\r\n" << green << "And got ";
             for (int i = 0; i < MaxItemCnt; ++i)
                 if (Product[id][i]) {
-                    player->GetItem(i, num * Product[id][i]);
+                    player->GetItem(new Item(i,Product[id][i]));
                     ss << num * Product[id][i] << "*" << Item::ItemInfo[i] << " ";
                 }
         } else ss << red << "Insufficient materials.";

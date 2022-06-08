@@ -6,7 +6,7 @@
 #include "Player.h"
 #include "Room.h"
 #include "Database.h"
-
+#include "Game.h"
 int MUD::Player::DefaultHP=100;
 int MUD::Player::DefaultAP=20;
 int MUD::Player::DefaultHeal=1000;
@@ -20,24 +20,22 @@ void MUD::Player::Enter(Room *r) {
     }
 }
 
-int MUD::Player::GetItem(int itemType, int number=0) {
-    if (items[itemType].Number()+number<0) number=-items[itemType].Number();
-    items[itemType].Number()+=number;
-    return number;
+void MUD::Player::GetItem(Item* item) {
+    items.push_back(item);
 }
 
 std::string MUD::Player::ShowItems() {
     bool flag= false;
     std::stringstream ss;
     for (auto o:items) {
-        if (o.Number()) flag= true;
+        if (o->Number()) flag= true;
     }
     if (!flag){
         return cyan+"You have nothing.";
     }
     ss<<green<<"You have:"<<"\r\n";
     for (auto o:items) {
-        if (o.Number()) ss<<green<<o.Number()<<"*"<<o.Info()<<", item ID:"<<o.ItemType()<<"\r\n";
+        if (o->Number()) ss<<green<<o->Number()<<"*"<<o->Info()<<", item ID:"<<o->ItemType()<<"\r\n";
     }
     return ss.str();
 }
@@ -45,7 +43,6 @@ std::string MUD::Player::ShowItems() {
 MUD::Player::Player(Connection<Telnet> &c): Creature(DefaultHeal,DefaultHP,DefaultAP), role(guest){
     conn=&c;
     name=c.IP();
-    for(int i=0;i<MaxItemCnt;++i) items[i]=Item(i);
 }
 
 void MUD::Player::Sendln(const std::string &s) {
@@ -146,4 +143,38 @@ bool MUD::Player::Attack(MUD::Creature &enemy) {
         enemy.Sendln(red+"You are defeated by "+name+"!");
     }
     return killed;
+}
+
+void MUD::Player::Deathrattle(MUD::Room *cur_room, MUD::Creature *) {
+    cur_room->RemovePlayer(id);
+    Enter(Game::origin);
+    Sendln(Game::origin->ShowInfo());
+    Game::origin->AddPlayer(this);
+}
+
+int MUD::Player::RemoveItem(int itemType, int number) {
+    for (auto it=items.begin();it!=items.end();){
+        if ((*it)->ItemType()==itemType){
+            if ((*it)->Number()>number){
+                (*it)->Number()-=number;
+                return 0;
+            }
+            number-=(*it)->Number();
+            delete (*it);
+            it=items.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    return number;
+}
+
+MUD::Item * MUD::Player::FetchItem(int itemType) {
+    for (auto it=items.begin();it!=items.end();++it)
+        if ((*it)->ItemType()==itemType){
+            auto res=*it;
+            items.erase(it);
+            return res;
+        }
+    return nullptr;
 }

@@ -39,7 +39,7 @@ namespace MUD {
         int itemType;
         int number;
     public:
-        Item(int t = -1);
+        Item(int t=-1, int num=0);
 
         static std::string ItemInfo[MaxItemCnt];
 

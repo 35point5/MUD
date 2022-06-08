@@ -8,6 +8,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
 #include "mysql++/mysql++.h"
 #include "mysql++/tcp_connection.h"
 #include <string>
@@ -24,6 +25,7 @@ namespace MUD {
         common,
         admin
     };
+
     class Room;
 
     class Player : public Creature {
@@ -31,7 +33,7 @@ namespace MUD {
 
     private:
         Room *currentRoom;
-        Item items[MaxItemCnt];
+        std::vector<Item*> items;
         Connection<Telnet> *conn;
         std::string password;
         Role role;
@@ -46,7 +48,7 @@ namespace MUD {
 
         void Enter(Room *r);
 
-        int GetItem(int itemType, int number);
+        void GetItem(Item* item);
 
         inline Room *CurrentRoom() { return currentRoom; }
 
@@ -54,7 +56,11 @@ namespace MUD {
 
         void Sendln(const std::string &s);
 
-        inline int ItemCnt(int id) { return items[id].Number(); }
+        inline int ItemCnt(int id) {
+            int num=0;
+            for(auto o:items) if (o->ItemType()==id) num+=o->Number();
+            return num;
+        }
 
         inline void InvalidCommand() { Sendln(red + "Invalid command!"); }
 
@@ -79,15 +85,19 @@ namespace MUD {
         inline Role GetRole() { return role; }
 
         bool Attack(Creature &enemy) override;
+
+        void Deathrattle(Room * cur_room,Creature *);
+
+        int RemoveItem(int itemType,int number=0);
         template<typename Ar>
         void serialize(Ar &ar, unsigned) {
             ar & name;
             ar & password;
             ar & role;
-            int cnt = MaxItemCnt;
-            ar & cnt;
-            for (int i = 0; i < cnt; ++i) ar & items[i];
+            ar & items;
         }
+
+        Item *FetchItem(int itemType);
     };
 
 }
