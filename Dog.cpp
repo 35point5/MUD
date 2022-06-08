@@ -7,6 +7,6 @@
 namespace MUD {
 
     void Dog::Deathrattle(Room *room, Creature *creature) {
-//        room->
+//        room->A
     }
 } // MUD

@@ -134,16 +134,6 @@ void MUD::Player::UnserializeFrom(const std::string &s) {
     ia>>*this;
 }
 
-bool MUD::Player::Attack(MUD::Creature &enemy) {
-    bool killed=enemy.GetHurt(ap);
-    Sendln(cyan+"You attack "+enemy.Name()+", cause "+std::to_string(ap)+" damage.");
-    enemy.Sendln(red+name+" attack you, causing "+std::to_string(ap)+" damage.");
-    if (killed){
-        Sendln(green+"You defeat "+enemy.Name()+"!");
-        enemy.Sendln(red+"You are defeated by "+name+"!");
-    }
-    return killed;
-}
 
 void MUD::Player::Deathrattle(MUD::Room *cur_room, MUD::Creature *) {
     cur_room->RemovePlayer(id);

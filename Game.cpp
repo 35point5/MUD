@@ -11,6 +11,7 @@ namespace MUD {
     int Game::n;
     int Game::m;
     Room *Game::origin;
+    int Game::maxMob = 3;
 
     void Game::Born(Connection<Telnet> &conn) {
         player = new Player(conn);
@@ -52,6 +53,8 @@ namespace MUD {
                     ShowRecipe();
                 } else if (sv[0] == "craft") {
                     Craft(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                } else if (sv[0] == "battle") {
+                    Battle();
                 } else if (sv[0] == "momomo") {
                     Momomo();
                 }
@@ -102,7 +105,7 @@ namespace MUD {
     }
 
     void Game::Deposit(int itype) {
-        auto item=player->FetchItem(itype);
+        auto item = player->FetchItem(itype);
         player->CurrentRoom()->GetSupplier()->Deposit(item);
 //        std::cout << "You deposit: " << num << "*" << Item::ItemInfo[itype] << std::endl;
         player->Sendln(green + "You've deposited: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[itype]);
@@ -110,8 +113,8 @@ namespace MUD {
 
     void Game::Withdraw(int itype) {
         auto item = player->CurrentRoom()->GetSupplier()->Withdraw(itype);
-        if (item== nullptr){
-            player->Sendln(red+"No such item!");
+        if (item == nullptr) {
+            player->Sendln(red + "No such item!");
             return;
         }
         player->GetItem(item);
@@ -156,7 +159,7 @@ namespace MUD {
     }
 
     void Game::Momomo() {
-        for (int i = 0; i < MaxItemCnt; ++i) player->GetItem(new Item(i,999));
+        for (int i = 0; i < MaxItemCnt; ++i) player->GetItem(new Item(i, 999));
     }
 
     void Game::Craft(int id, int num) {
@@ -173,13 +176,13 @@ namespace MUD {
             for (int i = 0; i < MaxItemCnt; ++i)
                 if (Recipe[id][i]) {
 //                    player->GetItem(i, -num * Recipe[id][i]);
-                    player->RemoveItem(i,num*Recipe[id][i]);
+                    player->RemoveItem(i, num * Recipe[id][i]);
                     ss << num * Recipe[id][i] << "*" << Item::ItemInfo[i] << " ";
                 }
             ss << "\r\n" << green << "And got ";
             for (int i = 0; i < MaxItemCnt; ++i)
                 if (Product[id][i]) {
-                    player->GetItem(new Item(i,Product[id][i]));
+                    player->GetItem(new Item(i, Product[id][i]));
                     ss << num * Product[id][i] << "*" << Item::ItemInfo[i] << " ";
                 }
         } else ss << red << "Insufficient materials.";
@@ -222,6 +225,32 @@ namespace MUD {
     void Game::Status() {
         player->Sendln(cyan + "HP: " + std::to_string(player->GetHP()) + "    AP: " + std::to_string(player->GetAP()));
         player->Sendln(player->ShowItems());
+    }
+
+    void Game::GenerateMob() {
+        for (int i = 0; i < n; ++i)
+            for (int j = 0; j < m; ++j)
+                if (map[i][j].GetMobCnt() < Game::maxMob) {
+                    map[i][j].AddMob(new Mob(*Mob::Instance[0]));
+                }
+    }
+
+    void Game::Battle() {
+        auto &mobs = player->CurrentRoom()->GetMobs();
+        while (1) {
+            if (mobs.empty()) break;
+            if (player->Attack(*mobs.back())) {
+                mobs.back()->Deathrattle(player->CurrentRoom(), player);
+                delete mobs.back();
+                mobs.pop_back();
+            }
+            for (auto o: mobs) {
+                if (o->Attack(*player)) {
+                    player->Deathrattle(player->CurrentRoom(), o);
+                    return;
+                }
+            }
+        }
     }
 
 } // MUD

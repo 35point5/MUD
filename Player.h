@@ -84,8 +84,6 @@ namespace MUD {
 
         inline Role GetRole() { return role; }
 
-        bool Attack(Creature &enemy) override;
-
         void Deathrattle(Room * cur_room,Creature *);
 
         int RemoveItem(int itemType,int number=0);

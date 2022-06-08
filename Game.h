@@ -15,6 +15,7 @@
 #include "StringLib.h"
 #include "Telnet.h"
 #include "fstream"
+#include "Dog.h"
 
 namespace MUD {
     class Generator;
@@ -26,6 +27,7 @@ namespace MUD {
         static Timer timer;
         static Room map[maxMapSize][maxMapSize];
         static int n, m;
+        static int maxMob;
         Player *player;
     public:
         static Room *origin;
@@ -34,6 +36,8 @@ namespace MUD {
         }
         ~Game();
         static void GenerateMap();
+
+        static void GenerateMob();
 
         void Enter();
 
@@ -58,6 +62,8 @@ namespace MUD {
         void Craft(int id, int num);
 
         void Status();
+
+        void Battle();
 
         void Momomo();
     };

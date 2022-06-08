@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include "functional"
 #include "Recover.h"
+#include "Telnet.h"
 namespace MUD {
 //    class Player;
     class Room;

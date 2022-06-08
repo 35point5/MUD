@@ -6,6 +6,7 @@
 #include "glog/raw_logging.h"
 #include <unistd.h>
 #include "Database.h"
+#include "Recover.h"
 using namespace MUD;
 int main(int argc, char** argv) {
     FLAGS_logtostderr=1;
@@ -18,12 +19,17 @@ int main(int argc, char** argv) {
     lm.SwitchConnManager(&cm);
     lm.AddPort(23);
     Game::GenerateMap();
+    Recover MobClock(10000);
     while (true){
         lm.Listen();
 //        LOG(INFO)<<"listen++"<<std::endl;
         cm.Manage();
 //        sleep(1);
 //        LOG(INFO)<<"round++"<<std::endl;
+        if (MobClock.Get()){
+            Game::GenerateMob();
+            MobClock.SetVal(0);
+        }
     }
     return 0;
 }

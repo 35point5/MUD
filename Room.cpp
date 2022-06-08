@@ -29,7 +29,7 @@ void MUD::Room::AddGenerator(MUD::Generator *g) {
 }
 
 std::string MUD::Room::ShowInfo() {
-    if (players.empty() && generators.empty() && supplier == nullptr) {
+    if (players.empty() && generators.empty() && supplier == nullptr && mobs.empty()) {
 //        std::cout << "这里啥都没有。" << std::endl;
         return cyan+"There is nothing.";
     }
@@ -43,6 +43,9 @@ std::string MUD::Room::ShowInfo() {
     for (auto o: generators) {
 //        std::cout << o->ShowGeneratorInfo() << "，内含" << o->Remain() << "单位" << o->ShowItemInfo() << "。" << std::endl;
         ss<<green<<"A "<<o->ShowGeneratorInfo()<<", contains "<<o->Remain()<<'*'<<o->ShowItemInfo()<<'.'<< "\r\n";
+    }
+    for(auto o:mobs){
+        ss<<red<<"A "<<o->Name()<<" HP:"<<o->GetHP()<<" DMG:"<<o->GetAP()<<".\r\n";
     }
     return ss.str();
 }
