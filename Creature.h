@@ -15,7 +15,7 @@ namespace MUD {
         int ap;
         Recover hp;
     public:
-        Creature(int r,int h,int a):hp(r,0,h),ap(a){};
+        Creature(int r,int h,int a):hp(r,h,h),ap(a){};
         virtual bool Attack(Creature &enemy);
         virtual void Deathrattle(Room *,Creature *){};
         virtual void Sendln(const std::string &s){};
