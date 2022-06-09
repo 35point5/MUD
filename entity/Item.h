@@ -10,6 +10,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/serialization.hpp>
 
+
+
 namespace MUD {
 //    const int Water = 0;
 //    const int Food = 1;
@@ -22,7 +24,7 @@ namespace MUD {
         Metal,
         Wood,
         Gunpowder,
-        KeyOfFarm,
+        KeyType,
         KeyOfBlastFurnance,
         CallerToTheSun,
         TheReconstructor,
@@ -32,12 +34,17 @@ namespace MUD {
     };
     const int MaxItemCnt = 20;
 
+    class Room;
+
+    class Player;
+
     class Item {
         friend class boost::serialization::access;
 
     private:
         int itemType;
         int number;
+
     public:
         Item(int t=-1, int num=0);
 
@@ -49,6 +56,8 @@ namespace MUD {
 
         inline std::string Info() { return ItemInfo[itemType]; }
 
+        virtual bool Use(Player* p, Room*);
+        virtual std::string GetInfo(){return std::to_string(number)+"*"+ItemInfo[itemType];}
         template<typename Ar>
         void serialize(Ar &ar, unsigned) {
             ar & itemType;

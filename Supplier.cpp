@@ -19,5 +19,5 @@ namespace MUD {
         return nullptr;
     }
 
-    Supplier::Supplier()=default;
+    Supplier::Supplier():disabled(true){};
 } // MUD

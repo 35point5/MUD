@@ -36,7 +36,7 @@ namespace MUD {
     const std::string bwhite = "\x1B[47m";
 
 //    const std::string newline = "\r\n\x1B[0m";
-    const std::string newline = "\r\n"+white;
+    const std::string newline = "\r\n"+reset+white;
     class Telnet {
     protected:
         char buffer[BUFSIZE];
@@ -45,6 +45,7 @@ namespace MUD {
         typedef ConnectionHandler<Telnet,std::string> handler;
         void Translate(Connection<Telnet> &conn,const char *buf,int len);
         void SendString(Connection<Telnet> &conn, const std::string& s);
+        inline void ClearBuf(){bufLen=0;}
     };
 
 } // MUD

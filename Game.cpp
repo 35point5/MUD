@@ -17,6 +17,8 @@ namespace MUD {
         player = new Player(conn);
         player->Enter(origin);
         player->Sendln(green + "Welcome! Please register or login first.");
+//        player->ClearBuf();
+//        std::cout<<"Canceled"<<std::endl;
         origin->AddPlayer(player);
     }
 
@@ -132,6 +134,7 @@ namespace MUD {
 
     void Game::ShowRecipe() {
         std::stringstream ss;
+        ss<<cyan+dim<<"You think you can take advantage of the things you have."<<newline;
         int cnt = 0;
         for (int i = 0; i < RecipeCnt; ++i) {
             bool flag = true;
@@ -204,8 +207,8 @@ namespace MUD {
             for (int j = 0; j < m; ++j) {
                 if (i) map[i][j].ModifyNeighbour(&map[i - 1][j], North);
                 if (j) map[i][j].ModifyNeighbour(&map[i][j - 1], West);
-                if (i < maxMapSize - 1) map[i][j].ModifyNeighbour(&map[i + 1][j], South);
-                if (j < maxMapSize - 1) map[i][j].ModifyNeighbour(&map[i][j + 1], East);
+                if (i < n - 1) map[i][j].ModifyNeighbour(&map[i + 1][j], South);
+                if (j < m - 1) map[i][j].ModifyNeighbour(&map[i][j + 1], East);
             }
         }
         Generator *W = new Generator(Water, 3);
@@ -250,6 +253,16 @@ namespace MUD {
                     return;
                 }
             }
+        }
+    }
+
+    void Game::Pickup() {
+        auto items=player->CurrentRoom()->GetItems();
+        auto it=items.begin();
+        while (it!=items.end()){
+            player->GetItem(*it);
+            player->Sendln(green+"You get "+(*it)->GetInfo()+".");
+            it=items.erase(it);
         }
     }
 

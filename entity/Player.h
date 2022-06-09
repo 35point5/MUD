@@ -14,8 +14,7 @@
 #include <string>
 #include <iostream>
 #include "Entity.h"
-#include "Item.h"
-#include "Telnet.h"
+#include "../socket/Telnet.h"
 #include "string"
 #include "Creature.h"
 
@@ -28,12 +27,14 @@ namespace MUD {
 
     class Room;
 
+    class Item;
+
     class Player : public Creature {
         friend class boost::serialization::access;
 
     private:
         Room *currentRoom;
-        std::vector<Item*> items;
+        std::vector<Item *> items;
         Connection<Telnet> *conn;
         std::string password;
         Role role;
@@ -48,7 +49,7 @@ namespace MUD {
 
         void Enter(Room *r);
 
-        void GetItem(Item* item);
+        void GetItem(Item *item);
 
         inline Room *CurrentRoom() { return currentRoom; }
 
@@ -56,13 +57,11 @@ namespace MUD {
 
         void Sendln(const std::string &s);
 
-        inline int ItemCnt(int id) {
-            int num=0;
-            for(auto o:items) if (o->ItemType()==id) num+=o->Number();
-            return num;
-        }
+        int ItemCnt(int id);
 
-        inline void InvalidCommand() { Sendln(red + "Invalid command!"); }
+        inline void InvalidCommand() {
+            Sendln(red + "You check your bag to see whether there is something you can use.");
+        }
 
         static bool PlayerExist(const std::string &name);
 
@@ -84,9 +83,12 @@ namespace MUD {
 
         inline Role GetRole() { return role; }
 
-        void Deathrattle(Room * cur_room,Creature *);
+        void Deathrattle(Room *cur_room, Creature *);
 
-        int RemoveItem(int itemType,int number=0);
+        int RemoveItem(int itemType, int number = 0);
+
+        inline void ClearBuf(){conn->ClearBuf();}
+
         template<typename Ar>
         void serialize(Ar &ar, unsigned) {
             ar & name;

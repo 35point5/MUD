@@ -11,16 +11,18 @@
 namespace MUD{
 class Entity {
 protected:
-    std::string name;
+    std::string name,description;
     int id;
     static int entityCnt;
     //static std::map<int,Entity*> entityMap;
 public:
-    Entity() : name("Undefined"), id(entityCnt++) {}
+    Entity() : name("Undefined"), id(entityCnt++),description("") {}
 
-    inline std::string Name() { return name; }
+    inline std::string GetName() { return name; }
 
     inline int GetID() const { return id; }
+
+    inline std::string GetDescription(){return description;}
 
     inline void Rename(std::string s){name=s;}
 };

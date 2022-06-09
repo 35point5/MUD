@@ -3,7 +3,7 @@
 //
 
 #include "Room.h"
-#include "Player.h"
+#include "entity/Player.h"
 #include "Generator.h"
 
 void MUD::Room::ModifyNeighbour(Room *n, int dir) {
@@ -40,13 +40,25 @@ std::string MUD::Room::ShowInfo() {
 //        std::cout << "仓库" << std::endl;
         ss<<green<<"A supplier."<< "\r\n";
     }
+    bool flag=false;
+    for (auto o:generators) if (o->IsDisabled()) flag=true;
+    if (flag) ss<<cyan+dim+"There exists a half abandoned generator, maybe you can take advantage of it."<<newline;
     for (auto o: generators) {
 //        std::cout << o->ShowGeneratorInfo() << "，内含" << o->Remain() << "单位" << o->ShowItemInfo() << "。" << std::endl;
-        ss<<green<<"A "<<o->ShowGeneratorInfo()<<", contains "<<o->Remain()<<'*'<<o->ShowItemInfo()<<'.'<< "\r\n";
+        ss<<green<<o->ShowGeneratorInfo()<<'.'<< "\r\n";
     }
     for(auto o:mobs){
-        ss<<red<<"A "<<o->Name()<<" HP:"<<o->GetHP()<<" DMG:"<<o->GetAP()<<".\r\n";
+        ss << red << o->CreatureInfo() <<newline;
+        ss <<dim<<red<<o->GetDescription()<<newline;
     }
     return ss.str();
+}
+
+bool MUD::Room::EnableGenerator(int gid) {
+    for (auto o:generators)
+    if (o->Type()==gid && o->Enable()){
+        return true;
+    }
+    return false;
 }
 

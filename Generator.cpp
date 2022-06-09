@@ -14,7 +14,7 @@ namespace MUD {
 
     Generator::Generator(int t, int r, int c, int f) : remain((f ? f : DefaultFrequency[t]) * 1000, r,
                                                               c ? c : DefaultCapacity[t]), itemType(t),
-                                                       disabled(false) {
+                                                       disabled(true) {
 
     }
 

@@ -8,6 +8,7 @@ namespace MUD {
     void Telnet::Translate(Connection<Telnet> &conn,const char *buf, int len) {
         for (int i=0;i<len;++i){
             char c=buf[i];
+            if (c==5) bufLen=0;
             if (c>=0x20 && c<0x7F && bufLen<BUFSIZE){
                 buffer[bufLen++]=c;
             }

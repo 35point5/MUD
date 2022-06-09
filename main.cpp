@@ -1,13 +1,16 @@
 #include <iostream>
 #include "Game.h"
-#include "ListenManager.h"
-#include "ConnectionManager.h"
+#include "socket/ListenManager.h"
+#include "socket/ConnectionManager.h"
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
 #include <unistd.h>
 #include "Database.h"
 #include "Recover.h"
+#include "random"
 using namespace MUD;
+std::random_device rd;
+std::mt19937 mt(rd());
 int main(int argc, char** argv) {
     FLAGS_logtostderr=1;
     google::InitGoogleLogging(argv[0]);

@@ -4,9 +4,10 @@
 
 
 #include "Player.h"
-#include "Room.h"
-#include "Database.h"
-#include "Game.h"
+#include "../Room.h"
+#include "../Database.h"
+#include "../Game.h"
+#include "Item.h"
 int MUD::Player::DefaultHP=100;
 int MUD::Player::DefaultAP=20;
 int MUD::Player::DefaultHeal=1000;
@@ -15,7 +16,7 @@ void MUD::Player::Enter(Room *r) {
     currentRoom=r;
     if (role>guest){
         std::stringstream ss;
-        ss << green << "You entered room No." << currentRoom->GetID() << "\r\n";
+        ss << green << "You entered Field No." << currentRoom->GetID() << "\r\n";
         Sendln(ss.str());
     }
 }
@@ -101,6 +102,9 @@ bool MUD::Player::Register(const std::string &p_name, const std::string &p_passw
     name=p_name;
     password=p_password;
     Save(SerializeTo());
+    Sendln("Welcome to this wasteland, whether this place will be the beginning of human-beings, or be the end of this kind, it is now, all depend on you...");
+    Sendln("You used to be very familiar with this fair land, but the shattered moon light, the broken landscape bring you back to reality...");
+    Sendln("But drag your attention back here for a moment, you need to learn to live in this hell. Try thinking about \"help\", there might be some knowledge occur to you.");
     Sendln(currentRoom->ShowInfo());
     return true;
 }
@@ -167,4 +171,10 @@ MUD::Item * MUD::Player::FetchItem(int itemType) {
             return res;
         }
     return nullptr;
+}
+
+int MUD::Player::ItemCnt(int id) {
+    int num=0;
+    for(auto o:items) if (o->ItemType()==id) num+=o->Number();
+    return num;
 }

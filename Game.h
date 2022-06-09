@@ -5,17 +5,17 @@
 #ifndef PROJECT_GAME_H
 #define PROJECT_GAME_H
 
-#include "Entity.h"
+#include "entity/Entity.h"
 #include "Room.h"
-#include "Player.h"
+#include "entity/Player.h"
 #include "Timer.h"
 #include "algorithm"
-#include "Item.h"
+#include "entity/Item.h"
 #include "Generator.h"
 #include "StringLib.h"
-#include "Telnet.h"
+#include "socket/Telnet.h"
 #include "fstream"
-#include "Dog.h"
+#include "entity/Dog.h"
 
 namespace MUD {
     class Generator;
@@ -64,6 +64,8 @@ namespace MUD {
         void Status();
 
         void Battle();
+
+        void Pickup();
 
         void Momomo();
     };

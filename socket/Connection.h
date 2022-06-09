@@ -43,10 +43,12 @@ namespace MUD {
         inline bool Closed() { return closed; }
 
         inline void SendString(std::string s) { AppendBuf(s.data(), s.length()); }
+
+        inline void ClearBuf(){prot.ClearBuf();}
     };
 
     template<class protocol>
-    Connection<protocol>::Connection(const DataSocket &sock):DataSocket(sock), hand(nullptr) {}
+    Connection<protocol>::Connection(const DataSocket &sock):DataSocket(sock), hand(nullptr) {ClearBuf();}
 
     template<class protocol>
     void Connection<protocol>::AppendBuf(const char *buf, int len) {

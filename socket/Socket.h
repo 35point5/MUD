@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <cerrno>
 #include <fcntl.h>
-#include "MUDException.h"
+#include "../MUDException.h"
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
 namespace MUD {

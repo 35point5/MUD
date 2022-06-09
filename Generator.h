@@ -4,9 +4,11 @@
 
 #ifndef PROJECT_GENERATOR_H
 #define PROJECT_GENERATOR_H
+
 #include "Timer.h"
-#include "Item.h"
+#include "entity/Item.h"
 #include "Recover.h"
+
 namespace MUD {
     class Generator {
     private:
@@ -18,7 +20,7 @@ namespace MUD {
         static int DefaultCapacity[MaxItemCnt];
         static int DefaultFrequency[MaxItemCnt];
 
-        Generator(int t, int r = 0, int c = 0, int f = 0);
+        explicit Generator(int t, int r = 0, int c = 0, int f = 0);
 
 
         int Harvest();
@@ -28,15 +30,30 @@ namespace MUD {
         }
 
         inline int Remain() {
-            return remain.Get();
+            return disabled?0:remain.Get();
         }
 
         inline std::string ShowGeneratorInfo() {
-            return GeneratorInfo[itemType];
+            std::stringstream ss;
+            if (!disabled)
+                ss<<"A "<<GeneratorInfo[itemType]<<", contains "<<Remain()<<'*'<<ShowItemInfo();
+            else
+                ss<<"A half abandoned "<<GeneratorInfo[itemType];
+            return ss.str();
         }
-        inline std::string ShowItemInfo(){
+
+        inline std::string ShowItemInfo() {
             return Item::ItemInfo[itemType];
         }
+
+        inline bool Enable() {
+            if (!disabled) return false;
+            disabled = false;
+            remain.SetVal(0);
+            return true;
+        }
+
+        inline bool IsDisabled(){return disabled;}
     };
 
 } // MUD

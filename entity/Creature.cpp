@@ -7,10 +7,10 @@
 namespace MUD {
     bool Creature::Attack(Creature &enemy) {
         bool killed=enemy.GetHurt(ap);
-        Sendln(cyan+"You attack "+enemy.Name()+", cause "+std::to_string(ap)+" damage.");
+        Sendln(cyan + "You attack " + enemy.GetName() + ", cause " + std::to_string(ap) + " damage.");
         enemy.Sendln(red+name+" attack you, causing "+std::to_string(ap)+" damage.");
         if (killed){
-            Sendln(green+"You defeat "+enemy.Name()+"!");
+            Sendln(green + "You defeat " + enemy.GetName() + "!");
             enemy.Sendln(red+"You are defeated by "+name+"!");
         }
         return killed;

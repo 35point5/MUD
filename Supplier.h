@@ -5,7 +5,7 @@
 #ifndef PROJECT_SUPPLIER_H
 #define PROJECT_SUPPLIER_H
 
-#include "Item.h"
+#include "entity/Item.h"
 
 namespace MUD {
     const int RecipeCnt=3;
@@ -14,10 +14,12 @@ namespace MUD {
     class Supplier {
     private:
         std::vector<Item*> storage;
+        bool disabled;
     public:
         Supplier();
         void Deposit(Item *item);
         Item *Withdraw(int itype);
+        inline bool IsDisabled(){return disabled;}
     };
 
 } // MUD

@@ -6,8 +6,8 @@
 #define MUD_CREATURE_H
 #include "Entity.h"
 #include "functional"
-#include "Recover.h"
-#include "Telnet.h"
+#include "../Recover.h"
+#include "../socket/Telnet.h"
 namespace MUD {
 //    class Player;
     class Room;
@@ -23,6 +23,11 @@ namespace MUD {
         inline int GetHP() {return hp.Get();}
         inline int GetAP() {return ap;}
         bool GetHurt(int damage);
+        inline std::string CreatureInfo(){
+            std::stringstream ss;
+            ss << "A " << GetName() << " HP:" << GetHP() << " DMG:" << GetAP();
+            return ss.str();
+        }
     };
 
 } // MUD
