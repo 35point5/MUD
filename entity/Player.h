@@ -60,7 +60,7 @@ namespace MUD {
         int ItemCnt(int id);
 
         inline void InvalidCommand() {
-            Sendln(red + "You check your bag to see whether there is something you can use.");
+            Sendln(red + "Invalid command, use \"help\" to show help.");
         }
 
         static bool PlayerExist(const std::string &name);
@@ -88,6 +88,8 @@ namespace MUD {
         int RemoveItem(int itemType, int number = 0);
 
         inline void ClearBuf(){conn->ClearBuf();}
+
+        void Use(int index, int num);
 
         template<typename Ar>
         void serialize(Ar &ar, unsigned) {

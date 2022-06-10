@@ -12,16 +12,19 @@ namespace MUD {
     int Generator::DefaultCapacity[MaxItemCnt] = {20, 10, 5};
     int Generator::DefaultFrequency[MaxItemCnt] = {10, 30, 60};
 
-    Generator::Generator(int t, int r, int c, int f) : remain((f ? f : DefaultFrequency[t]) * 1000, r,
-                                                              c ? c : DefaultCapacity[t]), itemType(t),
+    Generator::Generator(Item* t, int r, int c, int f) : remain((f ? f : DefaultFrequency[t->ItemType()]) * 1000, r,
+                                                              c ? c : DefaultCapacity[t->ItemType()]), item(t),
                                                        disabled(true) {
 
     }
 
 
-    int Generator::Harvest() {
+    Item * Generator::Harvest() {
+        if (disabled) return nullptr;
         int r = remain.Get();
         remain.SetVal(0);
-        return r;
+        auto it=item->CopyItem();
+        it->Number()*=r;
+        return it;
     }
 } // MUD

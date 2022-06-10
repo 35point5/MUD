@@ -3,7 +3,9 @@
 //
 
 #include "Creature.h"
-
+#include "random"
+#include "../Room.h"
+extern std::mt19937 mt;
 namespace MUD {
     bool Creature::Attack(Creature &enemy) {
         bool killed=enemy.GetHurt(ap);
@@ -21,5 +23,17 @@ namespace MUD {
         oldHP-=damage;
         hp.SetVal(oldHP);
         return oldHP<0;
+    }
+
+    void Creature::Drop(Room *room, Creature *creature, std::vector<std::pair<Item *, int>> &drop) {
+        std::uniform_int_distribution<int> rnd(1,100);
+        for (auto o:drop){
+            int rp=rnd(mt);
+            auto it=o.first->CopyItem();
+            if (rp<=o.second){
+                room->AddItem(it);
+                creature->Sendln("Drop "+it->GetInfo()+" .");
+            }
+        }
     }
 } // MUD

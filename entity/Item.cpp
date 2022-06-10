@@ -8,9 +8,9 @@
 namespace MUD {
     std::string Item::ItemInfo[MaxItemCnt]={"water","food","metal","wood","gunpowder","key","key of BlastFurnance","caller to the sun","the Reconstructor","sword","gun","bullet"};
 
-    Item::Item(int t, int num) : itemType(t), number(num){}
+    Item::Item(int t, int num) : itemType(t), number(num),stackable(true){}
 
-    bool Item::Use(Player *p, Room *) {
+    int Item::Use(Player *p, Room *, int num) {
         p->Sendln("No effect.");
         return false;
     }

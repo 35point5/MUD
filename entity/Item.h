@@ -9,18 +9,19 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/serialization.hpp>
-
-
+#include "boost/serialization/base_object.hpp"
+#include "boost/serialization/export.hpp"
+#include "boost/serialization/access.hpp"
 
 namespace MUD {
 //    const int Water = 0;
-//    const int Food = 1;
+//    const int FoodType = 1;
 //    const int Metal = 2;
 //    const int Wood = 3;
 //    const int Gunpowder=4;
     enum ItemList {
         Water = 0,
-        Food,
+        FoodType,
         Metal,
         Wood,
         Gunpowder,
@@ -29,7 +30,7 @@ namespace MUD {
         CallerToTheSun,
         TheReconstructor,
         Sword,
-        Gun,
+        GunType,
         Bullet
     };
     const int MaxItemCnt = 20;
@@ -41,12 +42,13 @@ namespace MUD {
     class Item {
         friend class boost::serialization::access;
 
-    private:
+    protected:
         int itemType;
         int number;
+        int stackable;
 
     public:
-        Item(int t=-1, int num=0);
+        Item(int t = -1, int num = 0);
 
         static std::string ItemInfo[MaxItemCnt];
 
@@ -56,12 +58,19 @@ namespace MUD {
 
         inline std::string Info() { return ItemInfo[itemType]; }
 
-        virtual bool Use(Player* p, Room*);
-        virtual std::string GetInfo(){return std::to_string(number)+"*"+ItemInfo[itemType];}
+        virtual int Use(Player *p, Room *, int num);
+
+        virtual std::string GetInfo() { return std::to_string(number) + "*" + ItemInfo[itemType]; }
+
+        virtual Item *CopyItem() { return new Item(*this); };
+
+        inline bool IsStackable() { return stackable; }
+
         template<typename Ar>
         void serialize(Ar &ar, unsigned) {
             ar & itemType;
             ar & number;
+            ar & stackable;
         }
     };
 

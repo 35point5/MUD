@@ -16,8 +16,12 @@ namespace MUD {
     public:
         void Deathrattle(Room *room, Creature *creature) override;
 
-        Dog(int r = INT_MAX >> 1, int h = 4, int a = 2) : Mob(r, h, a) { name = "Dog"; description="A kind of weak creature, they are starved, they have no fear.";};
+        Dog(int r = INT_MAX >> 1, int h = 4, int a = 2) : Mob(r, h, a) { name = "Dog"; description="A kind of weak creature, they are starved, they have no fear.";}
+
+        Mob *CopyMob() override;;
     };
+
+
 
 } // MUD
 

@@ -8,6 +8,8 @@
 #include "functional"
 #include "../Recover.h"
 #include "../socket/Telnet.h"
+#include "Item.h"
+
 namespace MUD {
 //    class Player;
     class Room;
@@ -23,6 +25,9 @@ namespace MUD {
         inline int GetHP() {return hp.Get();}
         inline int GetAP() {return ap;}
         bool GetHurt(int damage);
+        inline int Heal(int healHP){hp.SetVal(hp.Get()+healHP);  return hp.Get();}
+        inline int MaxHP(){return hp.MaxVal();}
+        static void Drop(Room *room, Creature *creature, std::vector<std::pair<Item *, int>> &drop);
         inline std::string CreatureInfo(){
             std::stringstream ss;
             ss << "A " << GetName() << " HP:" << GetHP() << " DMG:" << GetAP();

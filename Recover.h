@@ -17,8 +17,9 @@ namespace MUD {
     public:
         explicit Recover(int rate,int val=0,int maxVal=INT_MAX>>1);
         inline int Get(){update(); return val;}
-        inline void SetVal(int v){update(); val=v;}
+        inline void SetVal(int v){update(); val=v; update();}
         inline void SetRate(int r){update(); rate=r;}
+        inline int MaxVal(){return maxVal;}
     };
 
 } // MUD

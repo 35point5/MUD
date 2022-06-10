@@ -55,7 +55,7 @@ namespace MUD {
 
         void Deposit(int itype);
 
-        void Withdraw(int itype);
+        void Withdraw(int index);
 
         void ShowRecipe();
 
@@ -66,6 +66,12 @@ namespace MUD {
         void Battle();
 
         void Pickup();
+
+        void ShowSupplier();
+
+        void Use(int index, int num);
+
+        void Help();
 
         void Momomo();
     };

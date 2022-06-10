@@ -12,7 +12,7 @@
 namespace MUD {
     class Generator {
     private:
-        int itemType;
+        Item *item;
         Recover remain;
         bool disabled;
     public:
@@ -20,13 +20,13 @@ namespace MUD {
         static int DefaultCapacity[MaxItemCnt];
         static int DefaultFrequency[MaxItemCnt];
 
-        explicit Generator(int t, int r = 0, int c = 0, int f = 0);
+        explicit Generator(Item* t, int r = 0, int c = 0, int f = 0);
 
 
-        int Harvest();
+        Item * Harvest();
 
-        inline int &Type() {
-            return itemType;
+        inline int Type() {
+            return item->ItemType();
         }
 
         inline int Remain() {
@@ -36,14 +36,14 @@ namespace MUD {
         inline std::string ShowGeneratorInfo() {
             std::stringstream ss;
             if (!disabled)
-                ss<<"A "<<GeneratorInfo[itemType]<<", contains "<<Remain()<<'*'<<ShowItemInfo();
+                ss<<"A "<<GeneratorInfo[Type()]<<", contains "<<Remain()<<'*'<<ShowItemInfo();
             else
-                ss<<"A half abandoned "<<GeneratorInfo[itemType];
+                ss<<"A half abandoned "<<GeneratorInfo[Type()];
             return ss.str();
         }
 
         inline std::string ShowItemInfo() {
-            return Item::ItemInfo[itemType];
+            return Item::ItemInfo[Type()];
         }
 
         inline bool Enable() {

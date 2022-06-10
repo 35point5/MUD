@@ -12,6 +12,7 @@ namespace MUD {
     public:
         static std::vector<Mob*> Instance;
         Mob(int r,int h,int a): Creature(r,h,a){};
+        virtual Mob* CopyMob(){return new Mob(*this);};
     };
 
 } // MUD

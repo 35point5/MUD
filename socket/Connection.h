@@ -48,7 +48,7 @@ namespace MUD {
     };
 
     template<class protocol>
-    Connection<protocol>::Connection(const DataSocket &sock):DataSocket(sock), hand(nullptr) {ClearBuf();}
+    Connection<protocol>::Connection(const DataSocket &sock):DataSocket(sock), hand(nullptr),closed(false) {ClearBuf();}
 
     template<class protocol>
     void Connection<protocol>::AppendBuf(const char *buf, int len) {

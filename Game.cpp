@@ -4,6 +4,7 @@
 
 
 #include "Game.h"
+#include "entity/Food.h"
 
 namespace MUD {
     Timer Game::timer;
@@ -42,8 +43,11 @@ namespace MUD {
                 } else if (sv[0] == "harvest") {
                     Harvest();
                 } else if (sv[0] == "refresh") {
+                    player->Sendln(
+                            "You check the supplier once more, seeing the resources comming out from supplier makes you satisfied.");
                     player->Sendln(player->CurrentRoom()->ShowInfo());
                 } else if (sv[0] == "bag") {
+                    player->Sendln(dim + cyan + "You check your bag to see whether there is something you can use.");
                     player->Sendln(player->ShowItems());
                 } else if (sv[0] == "status") {
                     Status();
@@ -57,13 +61,39 @@ namespace MUD {
                     Craft(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
                 } else if (sv[0] == "battle") {
                     Battle();
+                } else if (sv[0] == "pickup") {
+                    Pickup();
+                } else if (sv[0] == "supplier") {
+                    ShowSupplier();
+                } else if (sv[0] == "use") {
+                    Use(std::stoi(sv.at(1)), std::stoi(sv.at(2)));
+                } else if (sv[0] == "help") {
+                    Help();
                 } else if (sv[0] == "momomo") {
                     Momomo();
-                }
+                } else player->InvalidCommand();
             }
 
         } catch (...) { player->InvalidCommand(); }
 
+    }
+
+    void Game::Help() {
+        std::stringstream ss;
+        ss << green << "move e/w/n/s" << newline;
+        ss << green << "harvest" << newline;
+        ss << green << "refresh" << newline;
+        ss << green << "bag" << newline;
+        ss << green << "status" << newline;
+        ss << green << "deposit index" << newline;
+        ss << green << "withdraw index" << newline;
+        ss << green << "recipe" << newline;
+        ss << green << "craft ID number" << newline;
+        ss << green << "battle" << newline;
+        ss << green << "pickup" << newline;
+        ss << green << "supplier" << newline;
+        ss << green << "use index number" << newline;
+        player->Sendln(ss.str());
     }
 
     void Game::Move(std::string s) {
@@ -94,34 +124,42 @@ namespace MUD {
         Room *cur = player->CurrentRoom();
 //        std::cout << "You get:" << std::endl;
         std::stringstream ss;
-        ss << green + "You've got:" << "\r\n";
-        int hnum, htype;
+        std::vector<Item *> vec;
         for (auto o: cur->GetGenerator()) {
-            htype = o->Type();
-            hnum = o->Harvest();
+            auto harItem = o->Harvest();
+            if (harItem != nullptr) vec.push_back(harItem);
 //            std::cout << hnum << '*' << o->ShowItemInfo() << std::endl;
-            ss << green + std::to_string(hnum) + '*' + o->ShowItemInfo() << "\r\n";
-            player->GetItem(new Item(htype, hnum));
+        }
+        if (vec.empty()) ss << cyan + dim + "Nothing to harvest." << newline;
+        else {
+            ss << dim + cyan + "You take the resources into your bag, so what's the next step?" << newline;
+            ss << green + "You've got:" << newline;
+            for (auto o: vec) {
+                ss << green + o->GetInfo() << newline;
+                player->GetItem(o);
+            }
         }
         player->Sendln(ss.str());
     }
 
-    void Game::Deposit(int itype) {
-        auto item = player->FetchItem(itype);
+    void Game::Deposit(int index) {
+        auto item = player->FetchItem(index);
         player->CurrentRoom()->GetSupplier()->Deposit(item);
 //        std::cout << "You deposit: " << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green + "You've deposited: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[itype]);
+        player->Sendln(green + "You've deposited: " + item->GetInfo() +
+                       ", you don't need it in your bag any more.");
     }
 
-    void Game::Withdraw(int itype) {
-        auto item = player->CurrentRoom()->GetSupplier()->Withdraw(itype);
+    void Game::Withdraw(int index) {
+        auto item = player->CurrentRoom()->GetSupplier()->Withdraw(index);
         if (item == nullptr) {
             player->Sendln(red + "No such item!");
             return;
         }
         player->GetItem(item);
-//        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[itype] << std::endl;
-        player->Sendln(green + "You've withdrawn: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[itype]);
+//        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[index] << std::endl;
+        player->Sendln(green + "You've withdrawn: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[index] +
+                       ", they are now in your bag.");
     }
 
     void Game::Enter() {
@@ -134,7 +172,7 @@ namespace MUD {
 
     void Game::ShowRecipe() {
         std::stringstream ss;
-        ss<<cyan+dim<<"You think you can take advantage of the things you have."<<newline;
+        ss << cyan + dim << "You think you can take advantage of the things you have." << newline;
         int cnt = 0;
         for (int i = 0; i < RecipeCnt; ++i) {
             bool flag = true;
@@ -151,9 +189,7 @@ namespace MUD {
                     if (Recipe[i][j]) ss << Recipe[i][j] << "*" << Item::ItemInfo[j] << " ";
                 }
                 ss << "-->";
-                for (int j = 0; j < MaxItemCnt; ++j) {
-                    if (Product[i][j]) ss << Product[i][j] << "*" << Item::ItemInfo[j] << " ";
-                }
+                for (auto o: Product[i]) ss << o->GetInfo() << " ";
                 ss << "(ID:" << i << ")\r\n";
             }
         }
@@ -183,11 +219,12 @@ namespace MUD {
                     ss << num * Recipe[id][i] << "*" << Item::ItemInfo[i] << " ";
                 }
             ss << "\r\n" << green << "And got ";
-            for (int i = 0; i < MaxItemCnt; ++i)
-                if (Product[id][i]) {
-                    player->GetItem(new Item(i, Product[id][i]));
-                    ss << num * Product[id][i] << "*" << Item::ItemInfo[i] << " ";
-                }
+            for (auto o: Product[id]) {
+                auto newItem = o->CopyItem();
+                newItem->Number() *= num;
+                player->GetItem(newItem);
+                ss << newItem->GetInfo() << " ";
+            }
         } else ss << red << "Insufficient materials.";
         player->Sendln(ss.str());
     }
@@ -199,7 +236,10 @@ namespace MUD {
         for (n = 0; n < maxMapSize; ++n) {
             if (!(is >> s)) break;
             for (m = 0; m < s.length(); ++m) {
-                if (s[m] == 'O') origin = &map[n][m];
+                if (s[m] == 'O') {
+                    origin = &map[n][m];
+                    map[n][m].SetLevel(-1);
+                } else map[n][m].SetLevel(s[m] - '0');
             }
         }
         std::cout << "size:" << n << ' ' << m << std::endl;
@@ -211,11 +251,11 @@ namespace MUD {
                 if (j < m - 1) map[i][j].ModifyNeighbour(&map[i][j + 1], East);
             }
         }
-        Generator *W = new Generator(Water, 3);
+        Generator *W = new Generator(new Item(Water, 1), 3);
         origin->AddGenerator(W);
-        Generator *S = new Generator(Food, 1);
+        Generator *S = new Generator(new Food(1), 1);
         origin->AddGenerator(S);
-        Generator *M = new Generator(Metal);
+        Generator *M = new Generator(new Item(Metal, 1));
         origin->AddGenerator(M);
         Supplier *Sup = new Supplier;
         origin->ModifySupplier(Sup);
@@ -226,15 +266,17 @@ namespace MUD {
     }
 
     void Game::Status() {
-        player->Sendln(cyan + "HP: " + std::to_string(player->GetHP()) + "    AP: " + std::to_string(player->GetAP()));
+        player->Sendln(
+                cyan + "HP: " + std::to_string(player->GetHP()) + "/" + std::to_string(player->MaxHP()) + "    AP: " +
+                std::to_string(player->GetAP()));
         player->Sendln(player->ShowItems());
     }
 
     void Game::GenerateMob() {
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)
-                if (map[i][j].GetMobCnt() < Game::maxMob) {
-                    map[i][j].AddMob(new Mob(*Mob::Instance[0]));
+                if (map[i][j].GetMobCnt() < Game::maxMob && map[i][j].GetLevel() >= 0) {
+                    map[i][j].AddMob(Mob::Instance[map[i][j].GetLevel()]->CopyMob());
                 }
     }
 
@@ -257,13 +299,21 @@ namespace MUD {
     }
 
     void Game::Pickup() {
-        auto items=player->CurrentRoom()->GetItems();
-        auto it=items.begin();
-        while (it!=items.end()){
-            player->GetItem(*it);
-            player->Sendln(green+"You get "+(*it)->GetInfo()+".");
-            it=items.erase(it);
+        auto &items = player->CurrentRoom()->GetItems();
+        while (!items.empty()) {
+            player->GetItem(items.back());
+            player->Sendln(green + "You get " + (items.back())->GetInfo() + ".");
+            items.pop_back();
         }
     }
+
+    void Game::ShowSupplier() {
+        player->Sendln(player->CurrentRoom()->GetSupplier()->ShowInfo());
+    }
+
+    void Game::Use(int index, int num) {
+        player->Use(index, num);
+    }
+
 
 } // MUD

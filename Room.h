@@ -18,6 +18,7 @@ namespace MUD{
     const int South=1;
     const int West=2;
     const int North=3;
+    const std::vector<std::string> RoomInfo={"There exists a kind of weak creature, they are starved, they have no fear.","There exists a huge creature. They are strong, maybe stronger in the past. But now, you can deal with it with your strength."};
     class Room: public Entity{
     private:
         std::vector<Player*> players;
@@ -26,6 +27,7 @@ namespace MUD{
         Supplier *supplier;
         std::vector<Mob*> mobs;
         std::vector<Item*> items;
+        int level;
     public:
         void ModifyNeighbour(Room *n, int dir);
         void AddPlayer(Player *p);
@@ -42,6 +44,8 @@ namespace MUD{
         inline std::vector<Mob*> &GetMobs(){return mobs;}
         inline void AddItem(Item *it){items.push_back(it);}
         inline std::vector<Item*>& GetItems(){return items;}
+        inline void SetLevel(int l){level=l;}
+        inline int GetLevel(){return level;}
     };
 
 }

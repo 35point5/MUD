@@ -9,7 +9,7 @@
 #include "../Game.h"
 #include "Item.h"
 int MUD::Player::DefaultHP=100;
-int MUD::Player::DefaultAP=20;
+int MUD::Player::DefaultAP=6;
 int MUD::Player::DefaultHeal=1000;
 
 void MUD::Player::Enter(Room *r) {
@@ -22,6 +22,12 @@ void MUD::Player::Enter(Room *r) {
 }
 
 void MUD::Player::GetItem(Item* item) {
+    if (item->IsStackable()){
+        for(auto &o:items) if (o->ItemType()==item->ItemType() && o->IsStackable()){
+            o->Number()+=item->Number();
+            return;
+        }
+    }
     items.push_back(item);
 }
 
@@ -35,8 +41,10 @@ std::string MUD::Player::ShowItems() {
         return cyan+"You have nothing.";
     }
     ss<<green<<"You have:"<<"\r\n";
+    int index=0;
     for (auto o:items) {
-        if (o->Number()) ss<<green<<o->Number()<<"*"<<o->Info()<<", item ID:"<<o->ItemType()<<"\r\n";
+        ss<<green<<o->GetInfo()<<", item Index:"<<index<<"\r\n";
+        ++index;
     }
     return ss.str();
 }
@@ -51,6 +59,7 @@ void MUD::Player::Sendln(const std::string &s) {
 }
 
 MUD::Player::~Player() {
+    if (role<=guest) return;
     auto s=SerializeTo();
     LOG(INFO)<<"serialization: "<<s<<std::endl;
     Save(s);
@@ -163,18 +172,33 @@ int MUD::Player::RemoveItem(int itemType, int number) {
     return number;
 }
 
-MUD::Item * MUD::Player::FetchItem(int itemType) {
-    for (auto it=items.begin();it!=items.end();++it)
-        if ((*it)->ItemType()==itemType){
-            auto res=*it;
-            items.erase(it);
-            return res;
-        }
-    return nullptr;
+MUD::Item * MUD::Player::FetchItem(int itemIndex) {
+    if (itemIndex>=items.size()) return nullptr;
+    auto res=items[itemIndex];
+    items.erase(items.begin()+itemIndex);
+    return res;
 }
 
 int MUD::Player::ItemCnt(int id) {
     int num=0;
     for(auto o:items) if (o->ItemType()==id) num+=o->Number();
     return num;
+}
+
+void MUD::Player::Use(int index, int num) {
+    if (index>=items.size() || num<=0){
+        Sendln(red+"No such item!");
+        return;
+    }
+    if (items[index]->Number()<num){
+        Sendln(red+"No enough items!");
+        return;
+    }
+    int used= items[index]->Use(this, currentRoom, num);
+    if (used) Sendln(green+"You used "+ std::to_string(used)+"*"+items[index]->Info()+"!");
+    items[index]->Number()-=used;
+    if (items[index]->Number()<=0){
+        delete items[index];
+        items.erase(items.begin()+index);
+    }
 }
