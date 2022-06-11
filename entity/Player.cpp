@@ -61,6 +61,8 @@ void MUD::Player::Sendln(const std::string &s) {
 MUD::Player::~Player() {
     if (role<=guest) return;
     auto s=SerializeTo();
+    currentRoom->RemovePlayer(id);
+    for(auto o:items) delete o;
     LOG(INFO)<<"serialization: "<<s<<std::endl;
     Save(s);
 }

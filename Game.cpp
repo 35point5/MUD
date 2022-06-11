@@ -158,7 +158,7 @@ namespace MUD {
         }
         player->GetItem(item);
 //        std::cout << "你从仓库中取出了" << num << "*" << Item::ItemInfo[index] << std::endl;
-        player->Sendln(green + "You've withdrawn: " + std::to_string(item->Number()) + '*' + Item::ItemInfo[index] +
+        player->Sendln(green + "You've withdrawn: " + item->GetInfo() +
                        ", they are now in your bag.");
     }
 
